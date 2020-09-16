@@ -1,5 +1,5 @@
 # coding=utf-8
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from Modules.db_objects.db_objects import Session, engine, Base, UsbDrive, UsbDriveSchema
 
 # creating the Flask application
@@ -45,7 +45,7 @@ def get_usbdrives():
 
     # serializing as JSON
     session.close()
-    return jsonify(drives)
+    return render_template('test_drives.html', drives=drives)
 
 @app.route('/drives', methods=['POST'])
 def add_usbdrive():

@@ -1,0 +1,27 @@
+<!doctype html>
+<head>
+    <title>Hello from Flask</title>
+
+    <link rel="stylesheet" href="./static/styles.css">
+</head>
+
+<body>
+<div style="text-align:center">
+    <h1>UsbDrives</h1>
+  </div>
+{% if drives %}
+  <h2>Liste des disques durs autorisés: </h2>
+  <p hidden>fc = {{drives|tojson|safe}}</p>
+  <table>
+  {% for drive in drives %}
+  <tr>
+      <td><h1>{{ drive.id }}</h1></td>
+      <td><h1>{{ drive.serial_no }}</h1></td>
+  </tr>
+  {% endfor %}
+  </table>
+{% else %}
+  <h1>rien!</h1>
+{% endif %}
+</body>
+  
