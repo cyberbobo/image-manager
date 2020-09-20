@@ -1,13 +1,18 @@
 # coding=utf-8
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, url_for, redirect
 from Modules.db_objects.db_objects import Session, engine, Base, UsbDrive, UsbDriveSchema
+from Modules.forms.forms import newUsbDriveForm
+import os
 
 # creating the Flask application
 app = Flask(__name__)
 
+SECRET_KEY = os.urandom(32)
+app.config['SECRET_KEY'] = SECRET_KEY
+
 # generate database schema
 Base.metadata.create_all(engine)
-
+"""
 # start session
 session = Session()
 
@@ -32,8 +37,41 @@ if len(drives) == 0:
 print('### Drives:')
 for drive in drives:
     print(f'({drive.id}) {drive.serial_no}')
+"""
 
-@app.route('/drives')
+@app.route('/')
+def main():
+    return render_template('base.html')
+
+@app.route('/drives', methods=['GET', 'POST'])
+def manage_usbdrives():
+    # fetching from the database
+    session = Session()
+    drive_objects = session.query(UsbDrive).all()
+
+    # transforming into JSON-serializable objects
+    schema = UsbDriveSchema(many=True)
+    drives = schema.dump(drive_objects)
+
+    # serializing as JSON
+    session.close()
+
+    form = newUsbDriveForm()
+
+    if form.validate_on_submit():
+        usbdrive = UsbDrive(form.serial_no.data)
+        session = Session()
+        session.add(usbdrive)
+        session.commit()
+        session.close()
+        return redirect(url_for('manage_usbdrives'))
+    else:
+        print(form.errors)
+
+    return render_template('drives_mgmt.html', drives=drives, form=form)
+
+"""
+# A SUPPRIMER
 def get_usbdrives():
     # fetching from the database
     session = Session()
@@ -46,8 +84,14 @@ def get_usbdrives():
     # serializing as JSON
     session.close()
     return render_template('test_drives.html', drives=drives)
+"""
 
-@app.route('/drives', methods=['POST'])
+@app.route('/config')
+def configuration():
+    return render_template('config.html')
+
+"""
+@app.route('/bidon')
 def add_usbdrive():
     # mount drive object
     posted_usbdrive = UsbDriveSchema(only=('id', 'serial_no'))\
@@ -64,3 +108,4 @@ def add_usbdrive():
     new_usbdrive = UsbDriveSchema().dump(usbdrive)
     session.close()
     return jsonify(new_usbdrive), 201
+"""

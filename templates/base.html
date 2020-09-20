@@ -1,0 +1,17 @@
+<!doctype html>
+<head>
+    <title>Hello from Flask</title>
+    <link rel="stylesheet" href="./static/styles.css">
+</head>
+
+<body>
+    <h1>Gestion des sauvegardes et images disque</h1>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('main') }}">Accueil</a></li>
+            <li><a>Outils</a></li>
+            <li><a href="{{ url_for('configuration') }}">Configuration</a></li>
+        </ul>
+    </nav>
+    {% block content %}{% endblock %}
+</body>
