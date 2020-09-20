@@ -1,7 +1,7 @@
 # coding=utf-8
 from flask import Flask, jsonify, request, render_template, url_for, redirect
 from Modules.db_objects.db_objects import Session, engine, Base, UsbDrive, UsbDriveSchema
-from Modules.forms.forms import newUsbDriveForm
+from Modules.forms.forms import addUsbDriveForm, deleteUsbDriveForm
 import os
 
 # creating the Flask application
@@ -56,19 +56,66 @@ def manage_usbdrives():
     # serializing as JSON
     session.close()
 
-    form = newUsbDriveForm()
+    addForm = addUsbDriveForm()
+    delForm = deleteUsbDriveForm()
 
-    if form.validate_on_submit():
-        usbdrive = UsbDrive(form.serial_no.data)
+    return render_template('drives_mgmt.html', drives=drives, addForm=addForm, delForm=delForm)
+
+@app.route('/adddrive', methods=['GET', 'POST'])
+def add_usbdrive():
+    # fetching from the database
+    session = Session()
+    drive_objects = session.query(UsbDrive).all()
+
+    # transforming into JSON-serializable objects
+    schema = UsbDriveSchema(many=True)
+    drives = schema.dump(drive_objects)
+
+    # serializing as JSON
+    session.close()
+
+    addForm = addUsbDriveForm()
+    delForm = deleteUsbDriveForm()
+
+    if addForm.validate_on_submit():
+        usbdrive = UsbDrive(addForm.serial_no.data)
         session = Session()
         session.add(usbdrive)
         session.commit()
         session.close()
         return redirect(url_for('manage_usbdrives'))
     else:
-        print(form.errors)
+        print(addForm.errors)
 
-    return render_template('drives_mgmt.html', drives=drives, form=form)
+    return render_template('drives_mgmt.html', drives=drives, addForm=addForm, delForm=delForm)
+
+@app.route('/deldrive', methods=['GET', 'POST'])
+def del_usbdrive():
+    # fetching from the database
+    session = Session()
+    drive_objects = session.query(UsbDrive).all()
+
+    # transforming into JSON-serializable objects
+    schema = UsbDriveSchema(many=True)
+    drives = schema.dump(drive_objects)
+
+    # serializing as JSON
+    session.close()
+
+    addForm = addUsbDriveForm()
+    delForm = deleteUsbDriveForm()
+
+    if delForm.validate_on_submit():
+        session = Session()
+        usbdrive = session.query(UsbDrive).filter_by(serial_no=delForm.serial_no.data).first()
+        session.delete(usbdrive)
+        session.commit()
+        session.close()
+        return redirect(url_for('manage_usbdrives'))
+    else:
+        print(delForm.errors)
+
+    return render_template('drives_mgmt.html', drives=drives, addForm=addForm, delForm=delForm)
 
 """
 # A SUPPRIMER

@@ -19,12 +19,22 @@
     {% endif %}
     </div>
     <div>
-        <form method="POST">
-            {{ form.csrf_token }}
+        <form method="POST" action="/adddrive">
+            {{ addForm.csrf_token }}
             <table>
                 <tr>
-                    <td>{{ form.serial_no(size=24) }}</td>
-                    <td>{{ form.submit() }}</td>
+                    <td>{{ addForm.serial_no(size=24) }}</td>
+                    <td>{{ addForm.submit() }}</td>
+                </tr>
+            </table>
+        </form>
+
+        <form method="POST" action="/deldrive">
+            {{ delForm.csrf_token }}
+            <table>
+                <tr>
+                    <td>{{ delForm.serial_no(size=24) }}</td>
+                    <td>{{ delForm.submit() }}</td>
                 </tr>
             </table>
         </form>
