@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    {% if tools %}
+      <h2>Liste des outils de sauvegarde: </h2>
+      <p hidden>fc = {{tools|tojson|safe}}</p>
+      <table>
+          <tr>
+              <td>Outil</td>
+              <td>Version</td>
+          </tr>
+      {% for tool in tools %}
+      <tr>
+          <td>{{ tool.tool }}</td>
+          <td>{{ tool.version }}</td>
+      </tr>
+      {% endfor %}
+      </table>
+    {% else %}
+      Aucun outil n'est répertorié
+    {% endif %}
+    </div>
+    <div>
+        <form method="POST" action="/addtool">
+            {{ addForm.csrf_token }}
+            <table>
+                <tr>
+                    <td>{{ addForm.tool(size=24) }}</td>
+                    <td>{{ addForm.version(size=12) }}</td>
+                    <td>{{ addForm.submit() }}</td>
+                </tr>
+            </table>
+        </form>
+
+        <form method="POST" action="/deltool">
+            {{ delForm.csrf_token }}
+            <table>
+                <tr>
+                    <td>{{ delForm.tool(size=24) }}</td>
+                    <td>{{ delForm.version(size=12) }}</td>
+                    <td>{{ delForm.submit() }}</td>
+                </tr>
+            </table>
+        </form>
+    </div>
+{% endblock %}

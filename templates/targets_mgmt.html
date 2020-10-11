@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    {% if targets %}
+      <h2>Liste des machines cibles: </h2>
+      <p hidden>fc = {{targets|tojson|safe}}</p>
+      <table>
+          <tr>
+              <td>Nom</td>
+              <td>Fréq. de sauvegarde (en jours)</td>
+          </tr>
+      {% for target in targets %}
+      <tr>
+          <td>{{ target.name }}</td>
+          <td>{{ target.recommended_save_freq }}</td>
+      </tr>
+      {% endfor %}
+      </table>
+    {% else %}
+      Aucune machine n'est paramétrée pour la sauvegarde
+    {% endif %}
+    </div>
+    <div>
+        <form method="POST" action="/addtarget">
+            {{ addForm.csrf_token }}
+            <table>
+                <tr>
+                    <td>{{ addForm.name(size=24) }}</td>
+                    <td>{{ addForm.recommended_save_freq }}</td>
+                    <td>{{ addForm.submit() }}</td>
+                </tr>
+            </table>
+        </form>
+
+        <form method="POST" action="/deltarget">
+            {{ delForm.csrf_token }}
+            <table>
+                <tr>
+                    <td>{{ delForm.name(size=24) }}</td>
+                    <td>{{ delForm.submit() }}</td>
+                </tr>
+            </table>
+        </form>
+    </div>
+{% endblock %}

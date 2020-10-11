@@ -1,13 +1,13 @@
 # coding=utf-8
 from flask import Flask, jsonify, request, render_template, url_for, redirect
-from Modules.db_objects.db_objects import Session, engine, Base, UsbDrive, UsbDriveSchema
-from Modules.forms.forms import addUsbDriveForm, deleteUsbDriveForm
+from Modules.db_objects.db_objects import Session, engine, Base, UsbDrive, UsbDriveSchema, Target, TargetSchema, Tool, ToolSchema
+from Modules.forms.forms import addUsbDriveForm, deleteUsbDriveForm, addTargetForm, deleteTargetForm, addToolForm, deleteToolForm
 from Modules.nested_lookup.nested_lookup import nested_lookup
 from drives_mgmt import recursive_extraction
 import os
 from json import dumps
-#from psutil import disk_partitions
 from platform import system
+from sqlalchemy.exc import SQLAlchemyError
 
 # creating the Flask application
 app = Flask(__name__)
@@ -19,32 +19,6 @@ operating_system = system()
 
 # generate database schema
 Base.metadata.create_all(engine)
-"""
-# start session
-session = Session()
-
-# check for existing data
-drives = session.query(UsbDrive).all()
-
-if len(drives) == 0:
-    # create and persist dummy drive
-    python_drive = UsbDrive("123456789012345678901234")
-    session.add(python_drive)
-    python_drive = UsbDrive("01234567890123456789012")
-    session.add(python_drive)
-    python_drive = UsbDrive("666")
-    session.add(python_drive)
-    session.commit()
-    session.close()
-
-    # reload drives
-    drives = session.query(UsbDrive).all()
-
-# show existing drives
-print('### Drives:')
-for drive in drives:
-    print(f'({drive.id}) {drive.serial_no}')
-"""
 
 @app.route('/')
 def main():
@@ -88,7 +62,11 @@ def add_usbdrive():
         usbdrive = UsbDrive(addForm.serial_no.data)
         session = Session()
         session.add(usbdrive)
-        session.commit()
+        try :
+            session.commit()
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            print("erreur "+error)
         session.close()
         return redirect(url_for('manage_usbdrives'))
     else:
@@ -114,9 +92,12 @@ def del_usbdrive():
 
     if delForm.validate_on_submit():
         session = Session()
-        usbdrive = session.query(UsbDrive).filter_by(serial_no=delForm.serial_no.data).first()
-        session.delete(usbdrive)
-        session.commit()
+        try :
+            usbdrive = session.query(UsbDrive).filter_by(serial_no=delForm.serial_no.data).first()
+            session.delete(usbdrive)
+            session.commit()
+        except SQLAlchemyError as e:
+            print("exception")
         session.close()
         return redirect(url_for('manage_usbdrives'))
     else:
@@ -156,6 +137,168 @@ def scan_drives():
         connected_peripherals.append("erreur")
 
     return render_template('drives_mgmt.html', connected_peripherals=connected_peripherals, drives=drives, addForm=addForm, delForm=delForm)
+
+@app.route('/targets', methods=['GET', 'POST'])
+def manage_targets():
+    # fetching from the database
+    session = Session()
+    target_objects = session.query(Target).all()
+
+    # transforming into JSON-serializable objects
+    schema = TargetSchema(many=True)
+    targets = schema.dump(target_objects)
+
+    # serializing as JSON
+    session.close()
+
+    addForm = addTargetForm()
+    delForm = deleteTargetForm()
+
+    return render_template('targets_mgmt.html', targets=targets, addForm=addForm, delForm=delForm)
+
+@app.route('/addtarget', methods=['GET', 'POST'])
+def add_targets():
+    # fetching from the database
+    session = Session()
+    target_objects = session.query(Target).all()
+
+    # transforming into JSON-serializable objects
+    schema = TargetSchema(many=True)
+    targets = schema.dump(target_objects)
+
+    # serializing as JSON
+    session.close()
+
+    addForm = addTargetForm()
+    delForm = deleteTargetForm()
+
+    if addForm.validate_on_submit():
+        target = Target(addForm.name.data, addForm.recommended_save_freq.data)
+        session = Session()
+        session.add(target)
+        try :
+            session.commit()
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            print("erreur "+error)
+        session.close()
+        return redirect(url_for('manage_targets'))
+    else:
+        print(addForm.errors)
+
+    return render_template('targets_mgmt.html', targets=targets, addForm=addForm, delForm=delForm)
+
+@app.route('/deltarget', methods=['GET', 'POST'])
+def del_targets():
+    # fetching from the database
+    session = Session()
+    target_objects = session.query(Target).all()
+
+    # transforming into JSON-serializable objects
+    schema = TargetSchema(many=True)
+    targets = schema.dump(target_objects)
+
+    # serializing as JSON
+    session.close()
+
+    addForm = addTargetForm()
+    delForm = deleteTargetForm()
+
+    if delForm.validate_on_submit():
+        session = Session()
+        try :
+            target = session.query(Target).filter_by(name=delForm.name.data).first()
+            session.delete(target)
+            session.commit()
+        except SQLAlchemyError as e:
+            print("exception")
+        session.close()
+        return redirect(url_for('manage_targets'))
+    else:
+        print(delForm.errors)
+
+    return render_template('targets_mgmt.html', targets=targets, addForm=addForm, delForm=delForm)
+
+@app.route('/tools', methods=['GET', 'POST'])
+def manage_tools():
+    # fetching from the database
+    session = Session()
+    tool_objects = session.query(Tool).all()
+
+    # transforming into JSON-serializable objects
+    schema = ToolSchema(many=True)
+    tools = schema.dump(tool_objects)
+
+    # serializing as JSON
+    session.close()
+
+    addForm = addToolForm()
+    delForm = deleteToolForm()
+
+    return render_template('tools_mgmt.html', tools=tools, addForm=addForm, delForm=delForm)
+
+@app.route('/addtool', methods=['GET', 'POST'])
+def add_tools():
+    # fetching from the database
+    session = Session()
+    tool_objects = session.query(Tool).all()
+
+    # transforming into JSON-serializable objects
+    schema = ToolSchema(many=True)
+    tools = schema.dump(tool_objects)
+
+    # serializing as JSON
+    session.close()
+
+    addForm = addToolForm()
+    delForm = deleteToolForm()
+
+    if addForm.validate_on_submit():
+        tool = Tool(addForm.tool.data, addForm.version.data)
+        session = Session()
+        session.add(tool)
+        try :
+            session.commit()
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            print("erreur "+error)
+        session.close()
+        return redirect(url_for('manage_tools'))
+    else:
+        print(addForm.errors)
+
+    return render_template('tools_mgmt.html', tools=tools, addForm=addForm, delForm=delForm)
+
+@app.route('/deltool', methods=['GET', 'POST'])
+def del_tools():
+    # fetching from the database
+    session = Session()
+    tool_objects = session.query(Tool).all()
+
+    # transforming into JSON-serializable objects
+    schema = ToolSchema(many=True)
+    tools = schema.dump(tool_objects)
+
+    # serializing as JSON
+    session.close()
+
+    addForm = addToolForm()
+    delForm = deleteToolForm()
+
+    if delForm.validate_on_submit():
+        session = Session()
+        try :
+            tool = session.query(Tool).filter_by(tool=delForm.tool.data, version=delForm.version.data).first()
+            session.delete(tool)
+            session.commit()
+        except SQLAlchemyError as e:
+            print("exception")
+        session.close()
+        return redirect(url_for('manage_tools'))
+    else:
+        print(delForm.errors)
+
+    return render_template('tools_mgmt.html', tools=tools, addForm=addForm, delForm=delForm)
 
 @app.route('/config')
 def configuration():

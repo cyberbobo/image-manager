@@ -7,6 +7,10 @@
       <h2>Liste des disques durs autorisés: </h2>
       <p hidden>fc = {{drives|tojson|safe}}</p>
       <table>
+          <tr>
+              <td>UUID</td>
+              <td></td>
+          </tr>
       {% for drive in drives %}
       <tr>
           <td>{{ drive.serial_no }}</td>

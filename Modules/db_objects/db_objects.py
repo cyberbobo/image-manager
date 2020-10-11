@@ -24,3 +24,29 @@ class UsbDrive(Entity, Base):
 class UsbDriveSchema(Schema):
     id = fields.Number()
     serial_no = fields.Str()
+
+class Target(Entity, Base):
+    __tablename__ = "target_machines"
+    name = Column(String)
+    recommended_save_freq = Column(Integer)
+    def __init__(self, name, recommended_save_freq):
+        self.name = name
+        self.recommended_save_freq = recommended_save_freq
+
+class TargetSchema(Schema):
+    id = fields.Number()
+    name = fields.Str()
+    recommended_save_freq = fields.Number()
+
+class Tool(Entity, Base):
+    __tablename__ = "saving_tools"
+    tool = Column(String)
+    version = Column(String)
+    def __init__(self, tool, version):
+        self.tool = tool
+        self.version = version
+
+class ToolSchema(Schema):
+    id = fields.Number()
+    tool = fields.Str()
+    version = fields.Str()
