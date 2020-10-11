@@ -39,6 +39,15 @@
             </table>
         </form>
 
-        <button>Rechercher les périphériques branchés</button>
+        <form method="POST" action="/scandrives">
+            <input type="submit" value="Rechercher les périphériques branchés">
+        </form>
+        <table>
+            {% for peripheral in connected_peripherals %}
+            <tr>
+                <td>{{ peripheral }}</td>
+            </tr>
+            {% endfor %}
+        </table>
     </div>
 {% endblock %}

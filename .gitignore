@@ -2,3 +2,8 @@ app-example.py
 config BDD
 tests curl
 pipenv
+Modules/nested_lookup/nested_lookup.py
+Modules/nested_lookup/lookup_api.py
+Modules/nested_lookup/__init__.py
+Modules/nested_lookup/__pycache__/nested_lookup.cpython-37.pyc
+brouillon a supprimer - parsing json récursif

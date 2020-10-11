@@ -2,13 +2,20 @@
 from flask import Flask, jsonify, request, render_template, url_for, redirect
 from Modules.db_objects.db_objects import Session, engine, Base, UsbDrive, UsbDriveSchema
 from Modules.forms.forms import addUsbDriveForm, deleteUsbDriveForm
+from Modules.nested_lookup.nested_lookup import nested_lookup
+from drives_mgmt import recursive_extraction
 import os
+from json import dumps
+#from psutil import disk_partitions
+from platform import system
 
 # creating the Flask application
 app = Flask(__name__)
 
 SECRET_KEY = os.urandom(32)
 app.config['SECRET_KEY'] = SECRET_KEY
+
+operating_system = system()
 
 # generate database schema
 Base.metadata.create_all(engine)
@@ -117,9 +124,8 @@ def del_usbdrive():
 
     return render_template('drives_mgmt.html', drives=drives, addForm=addForm, delForm=delForm)
 
-"""
-# A SUPPRIMER
-def get_usbdrives():
+@app.route('/scandrives', methods=['GET', 'POST'])
+def scan_drives():
     # fetching from the database
     session = Session()
     drive_objects = session.query(UsbDrive).all()
@@ -130,29 +136,27 @@ def get_usbdrives():
 
     # serializing as JSON
     session.close()
-    return render_template('test_drives.html', drives=drives)
-"""
+
+    addForm = addUsbDriveForm()
+    delForm = deleteUsbDriveForm()
+
+    connected_peripherals = []
+    if operating_system == "Linux":
+        # lister les périphériques montés (/media)
+        medias = os.popen("df | grep \"/media/\"").readlines()  #OK
+        mountpoints = []
+        for line in medias:
+            mountpoints.append(line.split()[0].split("/")[2])
+        data = os.popen("lsblk -f -J").read()
+        uuid_dict = recursive_extraction(data)
+        for i in mountpoints :
+            connected_peripherals.append(uuid_dict[i])
+        print(connected_peripherals)
+    else :
+        connected_peripherals.append("erreur")
+
+    return render_template('drives_mgmt.html', connected_peripherals=connected_peripherals, drives=drives, addForm=addForm, delForm=delForm)
 
 @app.route('/config')
 def configuration():
     return render_template('config.html')
-
-"""
-@app.route('/bidon')
-def add_usbdrive():
-    # mount drive object
-    posted_usbdrive = UsbDriveSchema(only=('id', 'serial_no'))\
-        .load(request.get_json())
-
-    usbdrive = UsbDrive(**posted_usbdrive)
-
-    # persist usbdrive
-    session = Session()
-    session.add(usbdrive)
-    session.commit()
-
-    # return created usbdrive
-    new_usbdrive = UsbDriveSchema().dump(usbdrive)
-    session.close()
-    return jsonify(new_usbdrive), 201
-"""
