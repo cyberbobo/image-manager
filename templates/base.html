@@ -1,6 +1,6 @@
 <!doctype html>
 <head>
-    <title>Hello from Flask</title>
+    <title>Sauvegardes et images disque</title>
     <link rel="stylesheet" href="./static/styles.css">
 </head>
 
@@ -9,8 +9,8 @@
     <nav>
         <ul>
             <li><a href="{{ url_for('main') }}">Accueil</a></li>
-            <li><a>Outils</a></li>
             <li><a href="{{ url_for('configuration') }}">Configuration</a></li>
+            <li><a href="{{ url_for('new_save') }}">Inclure une sauvegarde au suivi</a></li>
         </ul>
     </nav>
     {% block content %}{% endblock %}

@@ -28,14 +28,17 @@ class UsbDriveSchema(Schema):
 class Target(Entity, Base):
     __tablename__ = "target_machines"
     name = Column(String)
+    tgt_type = Column(String)
     recommended_save_freq = Column(Integer)
-    def __init__(self, name, recommended_save_freq):
+    def __init__(self, name, tgt_type, recommended_save_freq):
         self.name = name
+        self.tgt_type = tgt_type
         self.recommended_save_freq = recommended_save_freq
 
 class TargetSchema(Schema):
     id = fields.Number()
     name = fields.Str()
+    tgt_type = fields.Str()
     recommended_save_freq = fields.Number()
 
 class Tool(Entity, Base):

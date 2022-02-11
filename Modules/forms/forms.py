@@ -12,6 +12,7 @@ class deleteUsbDriveForm(FlaskForm):
 
 class addTargetForm(FlaskForm):
     name = StringField('target', validators=[DataRequired()])
+    tgt_type = StringField('tgt_type', validators=[DataRequired()])
     recommended_save_freq = IntegerField('freq', validators=[DataRequired()])
     submit = SubmitField('Ajouter')
 

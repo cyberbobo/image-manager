@@ -8,6 +8,8 @@ import os
 from json import dumps
 from platform import system
 from sqlalchemy.exc import SQLAlchemyError
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
 
 # creating the Flask application
 app = Flask(__name__)
@@ -22,7 +24,16 @@ Base.metadata.create_all(engine)
 
 @app.route('/')
 def main():
-    return render_template('base.html')
+    return render_template('main.html')
+
+@app.route('/new_save', methods=['GET'])
+def new_save():
+    #popup : relou
+    # juste faire un file explorer : https://github.com/ergoithz/browsepy ?
+    # tkinter = file explorer
+    filename = askopenfilename() # show an "Open" dialog box and return the path to the selected file
+    print(filename)
+    return render_template('main.html')
 
 @app.route('/drives', methods=['GET', 'POST'])
 def manage_usbdrives():
@@ -173,7 +184,7 @@ def add_targets():
     delForm = deleteTargetForm()
 
     if addForm.validate_on_submit():
-        target = Target(addForm.name.data, addForm.recommended_save_freq.data)
+        target = Target(addForm.name.data, addForm.tgt_type.data, addForm.recommended_save_freq.data)
         session = Session()
         session.add(target)
         try :

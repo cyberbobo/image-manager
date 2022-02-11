@@ -3,22 +3,24 @@
 {% block content %}
 <div>
     {% if targets %}
-      <h2>Liste des machines cibles: </h2>
+      <h2>Liste des items cibles: </h2>
       <p hidden>fc = {{targets|tojson|safe}}</p>
       <table>
           <tr>
               <td>Nom</td>
+              <td>Type de cible</td>
               <td>Fréq. de sauvegarde (en jours)</td>
           </tr>
       {% for target in targets %}
       <tr>
           <td>{{ target.name }}</td>
+          <td>{{ target.tgt_type }}</td>
           <td>{{ target.recommended_save_freq }}</td>
       </tr>
       {% endfor %}
       </table>
     {% else %}
-      Aucune machine n'est paramétrée pour la sauvegarde
+      Aucune cible n'est paramétrée pour la sauvegarde
     {% endif %}
     </div>
     <div>
@@ -27,6 +29,7 @@
             <table>
                 <tr>
                     <td>{{ addForm.name(size=24) }}</td>
+                    <td>{{ addForm.tgt_type(size=24) }}</td>
                     <td>{{ addForm.recommended_save_freq }}</td>
                     <td>{{ addForm.submit() }}</td>
                 </tr>
